@@ -1,0 +1,58 @@
+﻿@page "/"
+@inject DataBaseServices db
+@inject IJSRuntime js
+
+<PageTitle>Index</PageTitle>
+
+<form>
+    <div class="form-group">
+        <label>İsim Girin</label>
+        <input type="text" class="form-control" @bind="md.Name" />
+    </div>
+    <div class="form-group">
+        <label>Soyad Girin</label>
+        <input type="text" class="form-control" @bind="md.Surname" />
+    </div>
+    <div class="form-group">
+        <label>Açıklama Girin</label>
+        <input type="text" class="form-control" @bind="md.Description" />
+    </div>
+    <button type="button" class="btn btn-primary" @onclick="Add">Ekle.</button>
+
+</form>
+<br />
+<button type="button" class="btn btn-primary" @onclick="Gelen">İndir.</button>
+
+@code {
+    MyData md = new MyData();
+
+    void Add()
+    {
+        db.InsertData(md);
+        md = new MyData();
+    }
+
+    async void Gelen()
+    {
+        var ss = db.GelenData();
+        
+        await js.InvokeVoidAsync("downloadJsonAsFile", ss, "veri.json");
+
+    }
+}
+
+<script>
+     function downloadJsonAsFile(data, fileName) {
+        const json = JSON.stringify(data);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+</script>
